@@ -3,100 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickMail Pro - Selector de Dominios</title>
+    <title>ProMail Express - Unique ID</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 font-sans min-h-screen flex flex-col items-center py-10 px-4 text-white">
 
     <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-xl border border-slate-700">
-        <h1 class="text-3xl font-extrabold text-blue-400 mb-2 text-center">QuickMail Pro ✉️</h1>
-        <p class="text-slate-400 text-center mb-8 text-sm">Elige tu nombre y tu dominio de privacidad.</p>
+        <h1 class="text-3xl font-extrabold text-blue-400 mb-2 text-center">ProMail Express 🚀</h1>
+        <p class="text-slate-400 text-center mb-8 text-sm">Correos únicos con protección anti-duplicados.</p>
 
-        <div class="bg-slate-700 p-6 rounded-xl mb-6 border border-slate-600">
+        <div class="bg-slate-700 p-6 rounded-xl mb-6">
             <div class="grid grid-cols-1 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-blue-300 mb-2 uppercase tracking-wider">Nombre</label>
-                    <input type="text" id="customName" placeholder="ej: jorge.pro" class="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                    <label class="block text-xs font-bold text-blue-300 mb-2 uppercase">Nombre Personalizado</label>
+                    <input type="text" id="userInput" placeholder="Ej: jorge.andres" class="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg outline-none text-white focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <div>
-                    <label class="block text-xs font-bold text-blue-300 mb-2 uppercase tracking-wider">Dominio</label>
-                    <select id="domainChoice" class="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                        <option value="1secmail.com">@1secmail.com</option>
-                        <option value="1secmail.org">@1secmail.org</option>
-                        <option value="1secmail.net">@1secmail.net</option>
+                    <label class="block text-xs font-bold text-blue-300 mb-2 uppercase">Dominio</label>
+                    <select id="domainSelect" class="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg outline-none text-white font-mono">
                         <option value="vmani.com">@vmani.com</option>
                         <option value="wwjmp.com">@wwjmp.com</option>
+                        <option value="lroid.com">@lroid.com</option>
                     </select>
                 </div>
 
-                <button onclick="genEmail()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-500 transition shadow-lg">Actualizar Correo</button>
+                <button onclick="crearCorreo()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-500 transition shadow-lg transform active:scale-95 text-lg">
+                    ⚡ Generar Correo Único
+                </button>
             </div>
         </div>
 
-        <div class="bg-slate-900 p-5 rounded-2xl border-2 border-blue-500/50 mb-8 relative">
-            <input type="text" id="emailAddr" readonly class="w-full bg-transparent text-xl font-mono text-blue-400 text-center outline-none">
-            <button onclick="copyEmail()" class="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-xl text-sm transition">Copiar Dirección</button>
+        <div class="bg-slate-900 p-5 rounded-2xl border-2 border-blue-500/50 mb-8">
+            <input type="text" id="finalEmail" readonly class="w-full bg-transparent text-xl font-mono text-blue-400 text-center outline-none" value="Configura tu nombre arriba">
+            <button onclick="copiar()" class="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-xl text-xs font-bold tracking-widest uppercase">Copiar</button>
         </div>
 
         <div class="border-t border-slate-700 pt-6">
-            <h2 class="text-xl font-bold text-slate-200 text-center mb-4">Bandeja de Entrada</h2>
+            <h2 class="text-xl font-bold text-slate-200 text-center mb-4 italic">Bandeja de Entrada</h2>
             <div id="loader" class="hidden text-center text-blue-400 text-xs mb-4 animate-pulse">Buscando mensajes...</div>
-            <div id="emailsList" class="space-y-4">
-                <div class="text-center py-10 bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-700 text-slate-500 text-sm">Esperando mensajes entrantes...</div>
+            <div id="msgList" class="space-y-3 text-center text-slate-500 text-sm py-5">
+                Los mensajes aparecerán aquí en segundos.
             </div>
         </div>
     </div>
 
     <script>
-        let currentEmail = "";
-        let timer = null;
+        let mailActivo = "";
+        let checker = null;
 
-        function genEmail() {
-            const custom = document.getElementById('customName').value.trim().toLowerCase();
-            const selectedDomain = document.getElementById('domainChoice').value;
-            let name = custom ? custom.replace(/[^a-z0-9.]/g, '') : Math.random().toString(36).substring(2, 10);
+        function crearCorreo() {
+            const rawName = document.getElementById('userInput').value.trim().toLowerCase();
+            const dom = document.getElementById('domainSelect').value;
             
-            currentEmail = `${name}@${selectedDomain}`;
-            document.getElementById('emailAddr').value = currentEmail;
-            document.getElementById('emailsList').innerHTML = '<div class="text-center py-10 bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-700 text-slate-500 text-sm">Buscando en este nuevo correo...</div>';
+            // Generar 4 números aleatorios
+            const num = Math.floor(1000 + Math.random() * 9000);
             
-            if(timer) clearInterval(timer);
-            checkMail();
-            timer = setInterval(checkMail, 5000);
+            let finalName = "";
+            if(rawName) {
+                // Si el usuario puso "jorge", queda "jorge4829"
+                finalName = rawName.replace(/[^a-z0-9.]/g, '') + num;
+            } else {
+                // Si no puso nada, generamos uno 100% random de 8 letras
+                finalName = Math.random().toString(36).substring(2, 10);
+            }
+            
+            mailActivo = `${finalName}@${dom}`;
+            document.getElementById('finalEmail').value = mailActivo;
+            document.getElementById('msgList').innerHTML = "Buscando correos para: " + mailActivo;
+            
+            if(checker) clearInterval(checker);
+            checkApi();
+            checker = setInterval(checkApi, 5000);
         }
 
-        async function checkMail() {
-            if(!currentEmail) return;
-            const [user, dom] = currentEmail.split('@');
+        async function checkApi() {
+            if(!mailActivo) return;
+            const [user, domain] = mailActivo.split('@');
             document.getElementById('loader').classList.remove('hidden');
 
             try {
-                const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${user}&domain=${dom}`);
-                const emails = await res.json();
-                const list = document.getElementById('emailsList');
+                const r = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${user}&domain=${domain}`);
+                const data = await r.json();
+                const box = document.getElementById('msgList');
 
-                if(emails && emails.length > 0) {
-                    list.innerHTML = "";
-                    emails.forEach(mail => {
-                        list.innerHTML += `
-                            <div class="p-4 bg-slate-700 border-l-4 border-blue-500 rounded-r-xl shadow-md">
-                                <p class="text-xs text-blue-400 font-bold mb-1 italic">DE: ${mail.from}</p>
-                                <p class="text-sm text-white">${mail.subject}</p>
-                            </div>
-                        `;
+                if(data && data.length > 0) {
+                    box.innerHTML = "";
+                    data.forEach(m => {
+                        box.innerHTML += `<div class="p-4 bg-slate-700 border-l-4 border-blue-400 rounded text-left shadow-lg">
+                            <p class="text-[10px] text-blue-300 font-bold uppercase">DE: ${m.from}</p>
+                            <p class="text-sm text-white">${m.subject}</p>
+                        </div>`;
                     });
                 }
-            } catch (e) { console.error("Error"); }
+            } catch (e) { console.log("Error conectando..."); }
             document.getElementById('loader').classList.add('hidden');
         }
 
-        function copyEmail() {
-            navigator.clipboard.writeText(document.getElementById('emailAddr').value);
-            alert("¡Copiado!");
+        function copiar() {
+            const field = document.getElementById('finalEmail');
+            if(field.value.includes("@")) {
+                navigator.clipboard.writeText(field.value);
+                alert("¡Copiado! " + field.value);
+            } else {
+                alert("Primero genera un correo.");
+            }
         }
 
-        window.onload = genEmail;
+        // Generar uno al cargar la página
+        window.onload = crearCorreo;
     </script>
 </body>
 </html>
