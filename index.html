@@ -3,87 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ImgOptimizador Pro - Smart Resize</title>
+    <title>Smart Optimizer + Preview</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0b0f1a] text-slate-200 min-h-screen flex flex-col items-center py-10 px-4 font-sans">
 
     <div class="w-full max-w-2xl bg-[#161d2f] p-8 rounded-3xl shadow-2xl border border-slate-800">
         <header class="text-center mb-8">
-            <h1 class="text-3xl font-black text-blue-500 italic tracking-tighter">SMART OPTIMIZER ⚡</h1>
-            <p class="text-slate-500 text-[10px] uppercase font-bold tracking-[0.2em] mt-1">Control de Calidad y Redimensionado</p>
+            <h1 class="text-3xl font-black text-blue-500 italic tracking-tighter uppercase">Smart Optimizer ⚡</h1>
+            <p class="text-slate-500 text-[10px] uppercase font-bold tracking-[0.2em] mt-1">Control de Resolución y Calidad</p>
         </header>
 
-        <div id="dropZone" class="border-2 border-dashed border-slate-700 bg-slate-900/50 rounded-2xl p-12 text-center hover:border-blue-500 transition-all cursor-pointer mb-6 group">
+        <div id="dropZone" class="border-2 border-dashed border-slate-700 bg-slate-900/50 rounded-2xl p-10 text-center hover:border-blue-500 transition-all cursor-pointer mb-6 group">
             <input type="file" id="fileInput" class="hidden" accept="image/*">
             <p class="text-lg font-bold group-hover:text-blue-400 transition">📂 Arrastra o selecciona tu imagen</p>
         </div>
 
-        <div id="editor" class="hidden space-y-6">
+        <div id="editor" class="hidden space-y-5">
             
-            <div id="upscaleWarning" class="hidden bg-orange-500/10 border border-orange-500/50 p-4 rounded-xl flex items-start gap-3">
-                <span class="text-orange-500 text-xl">⚠️</span>
-                <div>
-                    <p class="text-orange-400 text-xs font-bold uppercase">Aviso de Calidad</p>
-                    <p class="text-slate-400 text-[11px]">Estás superando el tamaño original. La imagen podría verse borrosa o pixelada.</p>
+            <div id="upscaleWarning" class="hidden bg-orange-500/10 border border-orange-500/50 p-3 rounded-xl flex items-center gap-3">
+                <span class="text-orange-500 text-lg">⚠️</span>
+                <p class="text-slate-400 text-[11px] font-medium uppercase tracking-tighter">Aviso: Superar el tamaño original causará pixelación.</p>
+            </div>
+
+            <div class="bg-black/40 rounded-2xl border border-slate-800 p-2 overflow-hidden">
+                <p class="text-center text-[9px] text-slate-600 uppercase font-bold mb-2">Vista Previa del Resultado</p>
+                <div class="flex justify-center items-center bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] rounded-lg overflow-hidden min-h-[150px]">
+                    <img id="imagePreview" class="max-h-60 shadow-2xl transition-all duration-200">
                 </div>
             </div>
 
-            <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-blue-400 text-[10px] font-black uppercase tracking-widest">📐 Dimensiones Finales</h2>
-                    <label class="flex items-center text-[11px] text-slate-500 cursor-pointer">
+            <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 grid grid-cols-2 gap-4">
+                <div class="col-span-2 flex justify-between items-center mb-1">
+                    <h2 class="text-blue-400 text-[9px] font-black uppercase tracking-widest">📐 Redimensionar (px)</h2>
+                    <label class="flex items-center text-[10px] text-slate-500 cursor-pointer">
                         <input type="checkbox" id="mantenerProporcion" checked class="mr-2 accent-blue-500">
-                        Bloquear Proporción
+                        Proporción Fija
                     </label>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="relative">
-                        <label class="block text-[9px] text-slate-500 uppercase font-bold mb-1 ml-1">Ancho (px)</label>
-                        <input type="number" id="anchoInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-lg font-mono text-white focus:border-blue-500 outline-none transition">
-                    </div>
-                    <div class="relative">
-                        <label class="block text-[9px] text-slate-500 uppercase font-bold mb-1 ml-1">Alto (px)</label>
-                        <input type="number" id="altoInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-lg font-mono text-white focus:border-blue-500 outline-none transition">
-                    </div>
-                </div>
+                <input type="number" id="anchoInput" class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-lg font-mono text-white focus:border-blue-500 outline-none" placeholder="Ancho">
+                <input type="number" id="altoInput" class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-lg font-mono text-white focus:border-blue-500 outline-none" placeholder="Alto">
             </div>
 
-            <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-slate-400 text-[10px] font-black uppercase tracking-widest font-mono">Post-Procesado</h2>
-                    <label class="flex items-center text-[11px] text-blue-400 font-bold cursor-pointer">
+            <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col justify-center">
+                    <label class="flex items-center text-[10px] text-blue-400 font-bold cursor-pointer mb-3">
                         <input type="checkbox" id="smartSharpen" class="mr-2 w-4 h-4 accent-blue-500">
-                        Nitidez IA (Beta)
+                        Nitidez Inteligente
                     </label>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <select id="formato" class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm outline-none cursor-pointer">
+                    <select id="formato" class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs outline-none cursor-pointer text-slate-300">
                         <option value="image/webp">Formato WebP</option>
                         <option value="image/jpeg">Formato JPG</option>
                         <option value="image/png">Formato PNG</option>
                     </select>
-                    <div class="flex flex-col justify-center">
-                        <div class="flex justify-between mb-1">
-                            <span class="text-[9px] text-slate-500 font-bold uppercase">Calidad</span>
-                            <span id="calidadTag" class="text-[9px] text-blue-400 font-bold">80%</span>
-                        </div>
-                        <input type="range" id="calidadRange" min="0.1" max="1.0" step="0.05" value="0.8" class="w-full accent-blue-500">
+                </div>
+                <div class="flex flex-col justify-center">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-[9px] text-slate-500 font-bold uppercase">Calidad</span>
+                        <span id="calidadTag" class="text-[9px] text-blue-400 font-bold">80%</span>
                     </div>
+                    <input type="range" id="calidadRange" min="0.1" max="1.0" step="0.05" value="0.8" class="w-full accent-blue-500">
                 </div>
             </div>
 
-            <div class="pt-4">
+            <div class="pt-2">
                 <div class="flex justify-between text-[10px] font-bold uppercase text-slate-500 px-2 mb-3">
-                    <span>Peso Original: <span id="pesoOriginal" class="text-slate-300">-</span></span>
-                    <span>Peso Final: <span id="pesoFinal" class="text-blue-400 font-black">-</span></span>
+                    <span>Original: <span id="pesoOriginal" class="text-slate-300">-</span></span>
+                    <span>Final Est: <span id="pesoFinal" class="text-blue-400 font-black">-</span></span>
                 </div>
-                <button onclick="descargar()" class="w-full bg-blue-600 hover:bg-blue-500 py-5 rounded-2xl font-black text-lg uppercase tracking-widest transition-all active:scale-95 shadow-xl shadow-blue-900/20">
-                    Exportar Imagen ⬇️
+                <button onclick="descargar()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black text-lg uppercase tracking-widest transition-all active:scale-95 shadow-xl shadow-blue-900/20">
+                    Descargar ⬇️
                 </button>
-                <button onclick="location.reload()" class="w-full text-slate-600 text-[10px] uppercase font-bold mt-4 hover:text-white transition">Subir otra diferente</button>
+                <button onclick="location.reload()" class="w-full text-slate-600 text-[9px] uppercase font-bold mt-4 hover:text-white transition">Limpiar y subir otra</button>
             </div>
         </div>
     </div>
@@ -94,6 +85,7 @@
         const upscaleWarning = document.getElementById('upscaleWarning'), smartSharpen = document.getElementById('smartSharpen');
         const pesoOriginal = document.getElementById('pesoOriginal'), pesoFinal = document.getElementById('pesoFinal');
         const calidadRange = document.getElementById('calidadRange'), calidadTag = document.getElementById('calidadTag'), formato = document.getElementById('formato');
+        const imagePreview = document.getElementById('imagePreview');
         
         let img = new Image(), ratio = 0, originalFile = null, originalW = 0, originalH = 0;
 
@@ -116,42 +108,34 @@
                     altoInput.value = originalH;
                     dropZone.classList.add('hidden');
                     editor.classList.remove('hidden');
-                    actualizarStats();
+                    actualizarTodo();
                 };
             };
             reader.readAsDataURL(file);
         }
 
-        // Lógica de dimensiones y alertas
         function checkUpscale() {
-            if (parseInt(anchoInput.value) > originalW || parseInt(altoInput.value) > originalH) {
+            if (parseInt(anchoInput.value) > originalW) {
                 upscaleWarning.classList.remove('hidden');
-                anchoInput.classList.add('text-orange-400');
-                altoInput.classList.add('text-orange-400');
             } else {
                 upscaleWarning.classList.add('hidden');
-                anchoInput.classList.remove('text-orange-400');
-                altoInput.classList.remove('text-orange-400');
             }
         }
 
         anchoInput.oninput = () => {
             if (mantener.checked) altoInput.value = Math.round(anchoInput.value / ratio);
-            checkUpscale();
-            actualizarStats();
+            actualizarTodo();
         };
         altoInput.oninput = () => {
             if (mantener.checked) anchoInput.value = Math.round(altoInput.value * ratio);
-            checkUpscale();
-            actualizarStats();
+            actualizarTodo();
         };
-
         calidadRange.oninput = () => {
             calidadTag.innerText = Math.round(calidadRange.value * 100) + "%";
-            actualizarStats();
+            actualizarTodo();
         };
-        formato.onchange = actualizarStats;
-        smartSharpen.onchange = actualizarStats;
+        formato.onchange = actualizarTodo;
+        smartSharpen.onchange = actualizarTodo;
 
         function renderCanvas() {
             const canvas = document.createElement('canvas');
@@ -159,28 +143,32 @@
             canvas.width = parseInt(anchoInput.value) || 1;
             canvas.height = parseInt(altoInput.value) || 1;
 
-            // Si el usuario activa "Nitidez Inteligente", aplicamos filtros de contraste
             if (smartSharpen.checked) {
-                // Filtro sutil para mejorar bordes al agrandar
-                ctx.filter = 'contrast(1.08) saturate(1.02) brightness(1.01)';
+                ctx.filter = 'contrast(1.08) saturate(1.05) brightness(1.02)';
             }
 
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             return canvas;
         }
 
-        function actualizarStats() {
+        function actualizarTodo() {
+            checkUpscale();
             const canvas = renderCanvas();
+            const dataUrl = canvas.toDataURL(formato.value, parseFloat(calidadRange.value));
+            
+            // Actualizar Imagen de Preview
+            imagePreview.src = dataUrl;
+            
+            // Actualizar Peso
             canvas.toBlob((blob) => {
                 if (blob) pesoFinal.innerText = (blob.size / 1024).toFixed(1) + " KB";
             }, formato.value, parseFloat(calidadRange.value));
         }
 
         function descargar() {
-            const canvas = renderCanvas();
             const link = document.createElement('a');
-            link.download = `optimized-image.${formato.value.split('/')[1]}`;
-            link.href = canvas.toDataURL(formato.value, parseFloat(calidadRange.value));
+            link.download = `smart-opt-${anchoInput.value}x${altoInput.value}.${formato.value.split('/')[1]}`;
+            link.href = imagePreview.src;
             link.click();
         }
     </script>
