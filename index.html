@@ -1,104 +1,37 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickMail Pro - Sistema Sincronizado</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-[#0f172a] font-sans min-h-screen flex flex-col items-center py-10 px-4 text-white">
+async function buscarMensajes() {
+    if(!correoActual) return;
+    const [user, dom] = correoActual.split('@');
+    const dot = document.getElementById('dot');
+    const status = document.getElementById('statusText');
 
-    <div class="bg-[#1e293b] p-8 rounded-3xl shadow-2xl w-full max-w-xl border border-slate-700">
-        <h1 class="text-3xl font-extrabold text-blue-400 mb-6 text-center italic">ProMail Pro 🚀</h1>
+    // Intentamos con un proxy alternativo más robusto
+    const apiURL = `https://www.1secmail.com/api/v1/?action=getMessages&login=${user}&domain=${dom}`;
+    const proxyURL = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(apiURL)}`;
+
+    try {
+        const res = await fetch(proxyURL);
+        if (!res.ok) throw new Error('Proxy fallido');
         
-        <div class="bg-[#334155] p-6 rounded-xl mb-6 border border-slate-600">
-            <label class="block text-[10px] font-bold text-blue-300 mb-2 uppercase tracking-widest">Nombre del correo</label>
-            <input type="text" id="userInput" placeholder="Ej: emanuel.pro" class="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg outline-none text-white mb-4 focus:ring-2 focus:ring-blue-500">
-            
-            <button onclick="generarTodo()" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-500 transition shadow-lg uppercase tracking-tighter active:scale-95 text-lg">
-                ⚡ ACTIVAR BANDEJA
-            </button>
-        </div>
+        const data = await res.json();
+        const lista = document.getElementById('msgList');
 
-        <div class="bg-slate-950 p-6 rounded-2xl border-2 border-blue-500/50 mb-8 text-center shadow-[0_0_20px_rgba(59,130,246,0.1)]">
-            <input type="text" id="finalEmail" readonly class="w-full bg-transparent text-xl font-mono text-blue-400 text-center outline-none font-bold" value="CREA TU CORREO">
-            <button onclick="copiarTexto()" id="btnCopiar" class="mt-4 text-blue-300 text-[10px] font-bold uppercase hidden hover:underline">Copiar Dirección</button>
-        </div>
+        dot.className = "h-2 w-2 bg-green-500 rounded-full mr-2 shadow-[0_0_8px_#22c55e]";
+        status.innerText = "Conectado";
 
-        <div class="border-t border-slate-700 pt-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-slate-200 uppercase text-[10px] font-bold tracking-widest italic">Bandeja de Entrada</h2>
-                <div id="signal" class="flex items-center">
-                    <div id="dot" class="h-2 w-2 bg-slate-600 rounded-full mr-2"></div>
-                    <span id="statusText" class="text-[9px] text-slate-500 font-bold uppercase">Inactivo</span>
-                </div>
-            </div>
-            <div id="msgList" class="space-y-3 text-center text-slate-500 text-xs py-10 border-2 border-dashed border-slate-700 rounded-2xl">
-                Haz clic en Activar para empezar a recibir mensajes.
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let correoActual = "";
-        let intervalo = null;
-
-        function generarTodo() {
-            const nombre = document.getElementById('userInput').value.trim().toLowerCase();
-            const num = Math.floor(1000 + Math.random() * 9000);
-            
-            // Generamos la dirección: nombre + números + @1secmail.com
-            let base = nombre ? nombre.replace(/[^a-z0-9]/g, '') + num : Math.random().toString(36).substring(2, 10);
-            correoActual = base + "@1secmail.com";
-            
-            document.getElementById('finalEmail').value = correoActual;
-            document.getElementById('btnCopiar').classList.remove('hidden');
-            document.getElementById('msgList').innerHTML = `<p class="animate-pulse text-blue-400">Escaneando servidor para:<br><b class="text-white">${correoActual}</b></p>`;
-            
-            if(intervalo) clearInterval(intervalo);
-            buscarMensajes();
-            intervalo = setInterval(buscarMensajes, 5000); // Revisa cada 5 seg
+        if(data && data.length > 0) {
+            lista.innerHTML = "";
+            data.forEach(m => {
+                lista.innerHTML += `
+                    <div class="p-4 bg-slate-800 border-l-4 border-blue-500 rounded text-left shadow-xl animate-bounce">
+                        <p class="text-[9px] text-blue-400 font-bold uppercase">De: ${m.from}</p>
+                        <p class="text-sm text-white font-semibold mt-1">${m.subject}</p>
+                    </div>`;
+            });
         }
-
-        async function buscarMensajes() {
-            if(!correoActual) return;
-            const [user, dom] = correoActual.split('@');
-            const dot = document.getElementById('dot');
-            const status = document.getElementById('statusText');
-
-            // USAMOS UN PROXY DIFERENTE MÁS ESTABLE
-            const apiURL = `https://www.1secmail.com/api/v1/?action=getMessages&login=${user}&domain=${dom}`;
-            const proxyURL = `https://api.allorigins.win/get?url=${encodeURIComponent(apiURL)}&cb=${Date.now()}`;
-
-            try {
-                const res = await fetch(proxyURL);
-                const json = await res.json();
-                const data = JSON.parse(json.contents);
-                const lista = document.getElementById('msgList');
-
-                dot.className = "h-2 w-2 bg-green-500 rounded-full mr-2 shadow-[0_0_8px_#22c55e]";
-                status.innerText = "Sincronizado";
-
-                if(data && data.length > 0) {
-                    lista.innerHTML = "";
-                    data.forEach(m => {
-                        lista.innerHTML += `
-                            <div class="p-4 bg-slate-800 border-l-4 border-blue-500 rounded text-left shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <p class="text-[9px] text-blue-400 font-bold uppercase">De: ${m.from}</p>
-                                <p class="text-sm text-white font-semibold mt-1">${m.subject}</p>
-                            </div>`;
-                    });
-                }
-            } catch (e) { 
-                dot.className = "h-2 w-2 bg-red-500 rounded-full mr-2";
-                status.innerText = "Error de Red";
-            }
-        }
-
-        function copiarTexto() {
-            navigator.clipboard.writeText(document.getElementById('finalEmail').value);
-            alert("¡Dirección copiada!");
-        }
-    </script>
-</body>
-</html>
+    } catch (e) { 
+        // Si el primer proxy falla, el punto se pone rojo para avisarte
+        dot.className = "h-2 w-2 bg-red-500 rounded-full mr-2";
+        status.innerText = "Reintentando conexión...";
+        console.error("Error detectado:", e);
+    }
+}
